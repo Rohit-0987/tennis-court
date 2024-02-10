@@ -3,6 +3,9 @@
 namespace App\Http\Livewire;
 
 use App\Models\Proposal;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 
 class EditProposal extends Component
@@ -464,7 +467,8 @@ class EditProposal extends Component
         'construction_of' => 'required',
     ];
 
-    public function mount($proposal){
+    public function mount($proposal)
+    {
         $this->proposal = $proposal;
 
         $this->work_to_be_performed = $proposal->work_to_be_performed;
@@ -473,27 +477,76 @@ class EditProposal extends Component
         $this->construction_of = $proposal->construction_of;
         $this->send_proposal_to = $proposal->send_proposal_to;
 
-        $this->setValues($proposal->overseas_conditions,"overseas_conditions");
-        $this->setValues($proposal->base,"base");
-        $this->setValues($proposal->court_preparation,"court_preparation");
-        $this->setValues($proposal->surfacing,"surfacing");
-        $this->setValues($proposal->fence,"fence");
-        $this->setValues($proposal->lights,"lights");
-        $this->setValues($proposal->court_accessories,"court_accessories");
-        $this->setValues($proposal->fee,"fee");
-        $this->setValues($proposal->provisions,"provisions");
-        $this->setValues($proposal->conditions,"conditions");
-        $this->setValues($proposal->guarantee,"guarantee");
-        $this->setValues($proposal->credit,"credit");
+        $this->setValues($proposal->overseas_conditions, "overseas_conditions");
+        $this->setValues($proposal->base, "base");
+        $this->setValues($proposal->court_preparation, "court_preparation");
+        $this->setValues($proposal->surfacing, "surfacing");
+        $this->setValues($proposal->fence, "fence");
+        $this->setValues($proposal->lights, "lights");
+        $this->setValues($proposal->court_accessories, "court_accessories");
+        $this->setValues($proposal->fee, "fee");
+        $this->setValues($proposal->provisions, "provisions");
+        $this->setValues($proposal->conditions, "conditions");
+        $this->setValues($proposal->guarantee, "guarantee");
+        $this->setValues($proposal->credit, "credit");
     }
 
-    public function render(){
+    public function render()
+    {
         return view('livewire.edit-proposal');
     }
+    public function sendProposalEmail()
+    {
+        try {
+            // Find the proposal
+            $proposal = Proposal::findOrFail($this->proposal->id);
 
-    public function submit(){
+            // Get the recipient email address
+            $email = $proposal->send_proposal_to;
+
+            // Generate the PDF
+            $pdf = PDF::loadView('proposal.edit', compact('proposal'))->setOptions(['defaultFont' => 'sans-serif']);
+
+            // Save the PDF to a temporary location
+            $directory = storage_path('app/temp');
+            if (!file_exists($directory)) {
+                mkdir($directory, 0755, true);
+            }
+            $pdfPath = $directory . '/proposal.pdf';
+            $pdf->save($pdfPath);
+
+            // Send email with attached PDF
+            Mail::send([], [], function ($message) use ($email, $pdfPath) {
+                $message->to($email)
+                    ->subject('Your Proposal PDF')
+                    ->attach($pdfPath);
+            });
+
+            // Delete the temporary PDF file
+            unlink($pdfPath);
+
+            // Dispatch success browser event
+            $this->dispatchBrowserEvent('alert', [
+                'type' => 'success',
+                'message' => 'Proposal email sent successfully!',
+                'title' => 'Success'
+            ]);
+        } catch (\Exception $e) {
+            // Log the error
+            Log::error('Error sending proposal email: ' . $e->getMessage());
+
+            // Dispatch error browser event
+            $this->dispatchBrowserEvent('alert', [
+                'type' => 'error',
+                'message' => 'Failed to send proposal email. Please try again later.',
+                'title' => 'Error'
+            ]);
+        }
+    }
+
+    public function submit()
+    {
         $this->validate();
-
         $this->proposal->update([
             'work_to_be_performed' => $this->work_to_be_performed,
             'customer' => $this->customer,
@@ -514,19 +567,22 @@ class EditProposal extends Component
             'credit' => $this->credit,
         ]);
 
-        $this->dispatchBrowserEvent('alert', 
-                ['type' => 'success',  'message' => 'Proposal Updated Successfully!', 'title' => 'Success']);
+        $this->dispatchBrowserEvent(
+            'alert',
+            ['type' => 'success',  'message' => 'Proposal Updated Successfully!', 'title' => 'Success']
+        );
     }
 
-    public function setValues($array,$key_name){
-        foreach($array as $key => $value){
+    public function setValues($array, $key_name)
+    {
+        foreach ($array as $key => $value) {
             $this->$key_name[$key]['selected'] = $value['selected'];
-            if($value['input']){
+            if ($value['input']) {
                 $this->$key_name[$key]['input_value'] = $value['input_value'];
             }
 
-            if(isset($value['multiple_inputs']) && count($value['multiple_inputs']) > 0){
-                foreach($value['multiple_inputs'] as $multi_key => $multi_input){
+            if (isset($value['multiple_inputs']) && count($value['multiple_inputs']) > 0) {
+                foreach ($value['multiple_inputs'] as $multi_key => $multi_input) {
                     $this->$key_name[$key]['multiple_inputs'][$multi_key]['value'] = $multi_input['value'];
                 }
             }

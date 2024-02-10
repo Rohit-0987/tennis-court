@@ -52,6 +52,7 @@
                             </td>
                             <td class="text-sm text-gray-900 font-light px-6 py-4 whitespace-nowrap">
                                 <a href="{{ route('proposal.edit',['proposal' => $proposal->id]) }}"><x-button type="button">Edit</x-button></a>
+                                <a href="{{ route('proposal.export',['proposal' => $proposal->id]) }}"><x-button class="btn btn-primary">Export</x-button></a>
                             </td>
                         </tr>
                     @endforeach

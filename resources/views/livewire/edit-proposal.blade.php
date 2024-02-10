@@ -110,6 +110,8 @@
 
         <div class="my-4 flex justify-center">
             <x-button type="submit" class="bg-green-500  hover:bg-green-800 mx-3" >Update Proposal</x-button>
+            <!-- Add this button in your view file -->
+            <x-button type="button" wire:click="sendProposalEmail" class="btn btn-primary">Send Proposal Email</x-button>
         </div>
     </form>
 </div>

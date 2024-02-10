@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Proposal;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ProposalController extends Controller
 {
@@ -83,4 +84,14 @@ class ProposalController extends Controller
     {
         //
     }
+    // ProposalController.php
+
+
+    public function exportToPDF($proposalId)
+    {
+        $proposal = Proposal::findOrFail($proposalId);
+        $pdf = PDF::loadView('proposal/edit', compact('proposal'))->setOptions(['defaultFont' => 'sans-serif']);
+        return $pdf->download('proposal_' . $proposal->id . '.pdf');
+    }
+
 }
