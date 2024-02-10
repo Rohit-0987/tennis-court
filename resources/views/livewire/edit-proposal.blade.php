@@ -1,7 +1,7 @@
 <div>
     {{-- Nothing in the world is as soft and yielding as water. --}}
     <div class="mb-4">
-        <h2 class="underline text-center font-medium text-4xl">Aggrement</h2>
+        <h2 class="underline text-center font-medium text-4xl">Agreement</h2>
     </div>
     <form wire:submit.prevent="submit">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
