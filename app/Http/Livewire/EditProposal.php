@@ -3,9 +3,10 @@
 namespace App\Http\Livewire;
 
 use App\Models\Proposal;
+use App\Notifications\ProposalPDF;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 
 class EditProposal extends Component
@@ -498,16 +499,12 @@ class EditProposal extends Component
     public function sendProposalEmail()
     {
         try {
-            // Find the proposal
             $proposal = Proposal::findOrFail($this->proposal->id);
 
-            // Get the recipient email address
             $email = $proposal->send_proposal_to;
 
-            // Generate the PDF
             $pdf = PDF::loadView('proposal.edit', compact('proposal'))->setOptions(['defaultFont' => 'sans-serif']);
 
-            // Save the PDF to a temporary location
             $directory = storage_path('app/temp');
             if (!file_exists($directory)) {
                 mkdir($directory, 0755, true);
@@ -515,27 +512,18 @@ class EditProposal extends Component
             $pdfPath = $directory . '/proposal.pdf';
             $pdf->save($pdfPath);
 
-            // Send email with attached PDF
-            Mail::send([], [], function ($message) use ($email, $pdfPath) {
-                $message->to($email)
-                    ->subject('Your Proposal PDF')
-                    ->attach($pdfPath);
-            });
+            Notification::route('mail', $email)->notify(new ProposalPDF($email, $pdfPath));
 
-            // Delete the temporary PDF file
             unlink($pdfPath);
 
-            // Dispatch success browser event
             $this->dispatchBrowserEvent('alert', [
                 'type' => 'success',
                 'message' => 'Proposal email sent successfully!',
                 'title' => 'Success'
             ]);
         } catch (\Exception $e) {
-            // Log the error
             Log::error('Error sending proposal email: ' . $e->getMessage());
 
-            // Dispatch error browser event
             $this->dispatchBrowserEvent('alert', [
                 'type' => 'error',
                 'message' => 'Failed to send proposal email. Please try again later.',
