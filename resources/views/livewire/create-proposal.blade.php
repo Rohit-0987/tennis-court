@@ -100,6 +100,15 @@
         </div>
 
         <hr />
+        <div>
+
+            <x-label for="signature_canvas">
+                signatureCanvas
+            </x-label>
+            <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="signature_canvas" rows="5" wire:model="signature_canvas">
+                
+            </textarea>
+        </div>
         <div class="my-4">
             <x-label for="send_proposal_to">
                 Send Proposal To

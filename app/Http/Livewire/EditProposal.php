@@ -8,12 +8,18 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Log;
 use Livewire\Component;
+use Illuminate\Support\Str;
 
+use Livewire\WithFileUploads;
+use Illuminate\Http\File;
+use Illuminate\Support\Facades\Storage;
 class EditProposal extends Component
 {
+    use WithFileUploads;
     public Proposal $proposal;
 
     public $work_to_be_performed;
+    public $signature_canvas;
     public $customer;
     public $customer_name;
     public $construction_of;
@@ -490,6 +496,7 @@ class EditProposal extends Component
         $this->setValues($proposal->conditions, "conditions");
         $this->setValues($proposal->guarantee, "guarantee");
         $this->setValues($proposal->credit, "credit");
+
     }
 
     public function render()
@@ -534,7 +541,28 @@ class EditProposal extends Component
 
     public function submit()
     {
+        
         $this->validate();
+
+        if(!$this->signature_canvas) {
+            $this->dispatchBrowserEvent(
+                'alert',
+                ['type' => 'error',  'message' => 'Need to Sign!', 'title' => 'Alert']
+            );
+        }
+        $dataURL = $this->signature_canvas;
+        $encodedData = explode(',', $dataURL)[1];
+        $decodedData = base64_decode($encodedData);
+        $filename = 'signature_' . Str::random(10) . '.png';
+        $storagePath = storage_path('app/public/signatures/');
+        if (!file_exists($storagePath)) {
+            mkdir($storagePath, 0755, true);
+        }
+        $filePath = $storagePath . $filename;
+        $fileSaved = file_put_contents($filePath, $decodedData);
+        if (!file_put_contents($filePath, $decodedData)) {
+            return redirect()->back()->withErrors(['error' => 'Failed to save the signature image.']);
+        }
         $this->proposal->update([
             'work_to_be_performed' => $this->work_to_be_performed,
             'customer' => $this->customer,
@@ -553,14 +581,25 @@ class EditProposal extends Component
             'conditions' => $this->conditions,
             'guarantee' => $this->guarantee,
             'credit' => $this->credit,
+            'signature_canvas' => '/storage/signatures/'. $filename,
         ]);
+
 
         $this->dispatchBrowserEvent(
             'alert',
             ['type' => 'success',  'message' => 'Proposal Updated Successfully!', 'title' => 'Success']
         );
     }
-
+    public $listeners = ['updateSignature' => 'updateSignature'];
+    
+    public function updateSignature($dataUrl)
+    {   
+        $this->signature_canvas = $dataUrl;
+    }
+    public function clearSignature()
+    {
+        $this->dispatchBrowserEvent('clear-signature');
+    }
     public function setValues($array, $key_name)
     {
         foreach ($array as $key => $value) {

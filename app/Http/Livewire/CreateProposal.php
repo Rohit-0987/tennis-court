@@ -10,6 +10,7 @@ class CreateProposal extends Component
 {
 
     public $work_to_be_performed;
+    public $signature_canvas;
     public $customer;
     public $customer_name;
     public $construction_of;
@@ -471,7 +472,8 @@ class CreateProposal extends Component
     public function submit(){
         $this->validate();
 
-        Proposal::create([
+        
+        $prop = Proposal::create([
             'user_id' => Auth::user()->id,
             'work_to_be_performed' => $this->work_to_be_performed,
             'customer' => $this->customer,
@@ -490,6 +492,7 @@ class CreateProposal extends Component
             'conditions' => $this->conditions,
             'guarantee' => $this->guarantee,
             'credit' => $this->credit,
+            'signature_canvas' => $this->signature_canvas,
         ]);
 
         $this->dispatchBrowserEvent('alert', 
