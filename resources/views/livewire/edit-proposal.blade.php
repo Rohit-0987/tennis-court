@@ -121,9 +121,11 @@
                 @enderror
             </div>
             <div>
-                <canvas class="border" id="signature_canvas" width="400" height="200"
-                    ></canvas>
-                    {{-- <input class="" type="text" id="signture_file" wire:model="signature_canvas" wire:ignore/> --}}
+                <canvas class="border" id="signature_canvas" width="400" height="200"></canvas>
+                @error('signature_canvas')
+                    <span class="error text-red-500">{{ $message }}</span>
+                @enderror
+                {{-- <input class="" type="text" id="signture_file" wire:model="signature_canvas" wire:ignore/> --}}
                 <button wire:click.prevent="clearSignature">Clear Signature</button>
             </div>
             <div class="my-4 flex justify-center">
@@ -134,18 +136,18 @@
     </form>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
     <script>
-        document.addEventListener('livewire:load', function () {
+        document.addEventListener('livewire:load', function() {
 
             const canvas = document.getElementById('signature_canvas');
             const signaturePad = new SignaturePad(canvas);
-            
-            document.addEventListener('clear-signature', function () {
+
+            document.addEventListener('clear-signature', function() {
                 signaturePad.clear();
             });
 
-            document.getElementById('signature_canvas').addEventListener('mousemove', function () {
+            document.getElementById('signature_canvas').addEventListener('mousemove', function() {
                 const dataURL = signaturePad.toDataURL();
-                Livewire.emit('updateSignature',dataURL);
+                Livewire.emit('updateSignature', dataURL);
             });
         });
     </script>

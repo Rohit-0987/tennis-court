@@ -472,6 +472,7 @@ class EditProposal extends Component
         'send_proposal_to' => 'required|email',
         'customer_name' => 'required',
         'construction_of' => 'required',
+        'signature_canvas' =>'required',
     ];
 
     public function mount($proposal)
@@ -483,7 +484,7 @@ class EditProposal extends Component
         $this->customer_name = $proposal->customer_name;
         $this->construction_of = $proposal->construction_of;
         $this->send_proposal_to = $proposal->send_proposal_to;
-
+        // $this->signature_canvas = null;
         $this->setValues($proposal->overseas_conditions, "overseas_conditions");
         $this->setValues($proposal->base, "base");
         $this->setValues($proposal->court_preparation, "court_preparation");
