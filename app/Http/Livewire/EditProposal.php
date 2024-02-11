@@ -10,12 +10,8 @@ use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Illuminate\Support\Str;
 
-use Livewire\WithFileUploads;
-use Illuminate\Http\File;
-use Illuminate\Support\Facades\Storage;
 class EditProposal extends Component
 {
-    use WithFileUploads;
     public Proposal $proposal;
 
     public $work_to_be_performed;
@@ -484,7 +480,6 @@ class EditProposal extends Component
         $this->customer_name = $proposal->customer_name;
         $this->construction_of = $proposal->construction_of;
         $this->send_proposal_to = $proposal->send_proposal_to;
-        // $this->signature_canvas = null;
         $this->setValues($proposal->overseas_conditions, "overseas_conditions");
         $this->setValues($proposal->base, "base");
         $this->setValues($proposal->court_preparation, "court_preparation");
@@ -545,12 +540,7 @@ class EditProposal extends Component
         
         $this->validate();
 
-        if(!$this->signature_canvas) {
-            $this->dispatchBrowserEvent(
-                'alert',
-                ['type' => 'error',  'message' => 'Need to Sign!', 'title' => 'Alert']
-            );
-        }
+        
         $dataURL = $this->signature_canvas;
         $encodedData = explode(',', $dataURL)[1];
         $decodedData = base64_decode($encodedData);

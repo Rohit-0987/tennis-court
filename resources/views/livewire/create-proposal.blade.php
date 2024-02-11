@@ -101,13 +101,12 @@
 
         <hr />
         <div>
-
-            <x-label for="signature_canvas">
-                signatureCanvas
-            </x-label>
-            <textarea class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="signature_canvas" rows="5" wire:model="signature_canvas">
-                
-            </textarea>
+            <canvas class="border" id="signature_canvas" width="400" height="200"></canvas>
+            @error('signature_canvas')
+                <span class="error text-red-500">{{ $message }}</span>
+            @enderror
+            {{-- <input class="" type="text" id="signture_file" wire:model="signature_canvas" wire:ignore/> --}}
+            <button wire:click.prevent="clearSignature">Clear Signature</button>
         </div>
         <div class="my-4">
             <x-label for="send_proposal_to">
@@ -121,4 +120,21 @@
             <x-button type="submit" class="bg-green-500  hover:bg-green-800" >Create Proposal</x-button>
         </div>
     </form>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+    <script>
+        document.addEventListener('livewire:load', function() {
+
+            const canvas = document.getElementById('signature_canvas');
+            const signaturePad = new SignaturePad(canvas);
+
+            document.addEventListener('clear-signature', function() {
+                signaturePad.clear();
+            });
+
+            document.getElementById('signature_canvas').addEventListener('mousemove', function() {
+                const dataURL = signaturePad.toDataURL();
+                Livewire.emit('updateSignature', dataURL);
+            });
+        });
+    </script>
 </div>

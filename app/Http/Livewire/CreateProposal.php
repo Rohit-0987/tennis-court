@@ -5,7 +5,7 @@ namespace App\Http\Livewire;
 use App\Models\Proposal;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
-
+use Illuminate\Support\Str;
 class CreateProposal extends Component
 {
 
@@ -463,17 +463,40 @@ class CreateProposal extends Component
         'send_proposal_to' => 'required|email',
         'customer_name' => 'required',
         'construction_of' => 'required',
+        'signature_canvas' =>'required',
     ];
 
     public function render(){
         return view('livewire.create-proposal');
     }
 
+    public $listeners = ['updateSignature' => 'updateSignature'];
+    
+    public function updateSignature($dataUrl)
+    {   
+        $this->signature_canvas = $dataUrl;
+    }
+    public function clearSignature()
+    {
+        $this->dispatchBrowserEvent('clear-signature');
+    }
     public function submit(){
         $this->validate();
 
-        
-        $prop = Proposal::create([
+        $dataURL = $this->signature_canvas;
+        $encodedData = explode(',', $dataURL)[1];
+        $decodedData = base64_decode($encodedData);
+        $filename = 'signature_' . Str::random(10) . '.png';
+        $storagePath = storage_path('app/public/signatures/');
+        if (!file_exists($storagePath)) {
+            mkdir($storagePath, 0755, true);
+        }
+        $filePath = $storagePath . $filename;
+        $fileSaved = file_put_contents($filePath, $decodedData);
+        if (!file_put_contents($filePath, $decodedData)) {
+            return redirect()->back()->withErrors(['error' => 'Failed to save the signature image.']);
+        }
+        Proposal::create([
             'user_id' => Auth::user()->id,
             'work_to_be_performed' => $this->work_to_be_performed,
             'customer' => $this->customer,
@@ -492,7 +515,7 @@ class CreateProposal extends Component
             'conditions' => $this->conditions,
             'guarantee' => $this->guarantee,
             'credit' => $this->credit,
-            'signature_canvas' => $this->signature_canvas,
+            'signature_canvas' => '/storage/signatures/'. $filename,
         ]);
 
         $this->dispatchBrowserEvent('alert', 
