@@ -29,6 +29,7 @@ class Proposal extends Model
         'guarantee',
         'credit',
         'signature_canvas',
+        'titles',
     ];
 
     public function user(){

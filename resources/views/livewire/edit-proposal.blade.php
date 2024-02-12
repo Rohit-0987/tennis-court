@@ -50,15 +50,14 @@
 
         <hr />
         <div>
-            <x-proposal-input-group :array="$overseas_conditions" title="Conditions For Overseas Installations"
+            <x-proposal-input-group :array="$overseas_conditions" title="{{$titles['overseas_conditions']}}"
                 variable="overseas_conditions" />
         </div>
 
         <hr />
-        <>
-
-            <x-proposal-input-group :array="$base" title="Base" variable="base" />
-
+            <div>
+                <x-proposal-input-group :array="$base" title="Base" variable="base" />
+            </div>
             <hr />
             <div>
                 <x-proposal-input-group :array="$court_preparation" title="Court Preparation" variable="court_preparation" />

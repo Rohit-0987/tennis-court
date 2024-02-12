@@ -471,6 +471,10 @@ class EditProposal extends Component
         'signature_canvas' =>'required',
     ];
 
+    public $titles = [
+        'overseas_conditions' => 'Conditions For Overseas Installations'
+    ];
+
     public function mount($proposal)
     {
         $this->proposal = $proposal;
@@ -492,7 +496,21 @@ class EditProposal extends Component
         $this->setValues($proposal->conditions, "conditions");
         $this->setValues($proposal->guarantee, "guarantee");
         $this->setValues($proposal->credit, "credit");
+        $this->setTitle($proposal->titles);
+    }
 
+    public function updateTitle($key) {
+        $this->titles[$key] = $key;
+        //u0date query
+    }
+
+    public function setTitle($array) {
+        if(!is_array($array)) {
+            $array = $this->titles;
+        }
+        foreach ($array as $key => $value) {
+            $this->titles[$key] = $value;
+        }
     }
 
     public function render()
@@ -505,7 +523,7 @@ class EditProposal extends Component
             $proposal = Proposal::findOrFail($this->proposal->id);
 
             $email = $proposal->send_proposal_to;
-
+            
             $pdf = PDF::loadView('proposal.edit', compact('proposal'))->setOptions(['defaultFont' => 'sans-serif']);
 
             $directory = storage_path('app/temp');
@@ -591,6 +609,7 @@ class EditProposal extends Component
     {
         $this->dispatchBrowserEvent('clear-signature');
     }
+    
     public function setValues($array, $key_name)
     {
         foreach ($array as $key => $value) {

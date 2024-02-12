@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProposalController;
+use App\Http\Livewire\PdfComponent;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,5 +18,5 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [ProposalController::class,'index'])->middleware(['auth'])->name('dashboard');
 Route::get('/proposal/create', [ProposalController::class,'create'])->middleware(['auth'])->name('proposal.create');
 Route::get('/proposal/{proposal}/edit', [ProposalController::class,'edit'])->middleware(['auth'])->name('proposal.edit');
-Route::get('/proposal/{proposal}/export-pdf', [ProposalController::class,'exportToPDF'])->middleware(['auth'])->name('proposal.export');
+Route::get('/proposal/{proposal}/export-pdf', [PdfComponent::class,'exportToPDF'])->middleware(['auth'])->name('proposal.export');
 require __DIR__.'/auth.php';
